@@ -56,11 +56,27 @@ async function processFile(file, index, size) {
     const tempPath = path.join(targetDir, `clean.${fileName}.webm`)
     
     const spinner = ora(`${fileName}`).start()
+    spinner.stop()
     spinner.suffixText = makeSuffix('Encoding')
-    await exec(`ffmpeg -i ${escapeFileArg(resovledPath)} -c:v libvpx-vp9 -b:v 25M -pix_fmt yuva420p -metadata:s:v:0 alpha_mode="1" -auto-alt-ref 0 ${escapeFileArg(targetPath)}`)
+    try {
+        const ffmpeg = exec(`ffmpeg -i ${escapeFileArg(resovledPath)} -c:v libvpx-vp9 -b:v 25M -pix_fmt yuva420p -metadata:s:v:0 alpha_mode="1" -auto-alt-ref 0 ${escapeFileArg(targetPath)}`)
+        ffmpeg.child.stderr.on('data', () => spinner.render())
+        await ffmpeg
+    } catch {
+        spinner.fail()
+        return
+    }
 
-    spinner.suffixText = makeSuffix('Cleaning')
-    await exec(`mkclean --doctype 4 --keep-cues --optimize ${escapeFileArg(targetPath)}`)
+    spinner.start()
+    try {
+        spinner.suffixText = makeSuffix('Cleaning')
+        const mkclean = exec(`mkclean --doctype 4 --keep-cues --optimize ${escapeFileArg(targetPath)}`)
+        await mkclean
+    } catch {
+        spinner.fail()
+        return
+    }
+
     spinner.suffixText = makeSuffix('Renaming')
 
     await fs.unlink(targetPath)
@@ -73,6 +89,11 @@ async function processFile(file, index, size) {
 }
 
 const inputFiles = process.argv.slice(2)
+
+if (inputFiles.length === 0) {
+    console.log("No files provided for encoding")
+    process.exit(1)
+}
 
 for (let i = 0; i < inputFiles.length; i++) {
     const input = inputFiles[i]
