@@ -12,10 +12,11 @@ const exec = util.promisify(cp.exec)
 const spawn = util.promisify(cp.spawn)
 
 function escapeFileArg(arg) {
-    if (process.platform === 'win32')
+    if (process.platform === 'win32') {
         return `"${arg}"`
-
-    return arg
+    } else {
+        return arg.replaceAll(/ /g, "\\ ")
+    }
 }
 
 function formatDuration(time) {
