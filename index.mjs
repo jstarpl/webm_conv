@@ -18,6 +18,14 @@ function escapeFileArg(arg) {
     return arg
 }
 
+function formatDuration(time) {
+    const timeInSec = time / 1000;
+    const seconds = timeInSec % 60;
+    const minutes = Math.floor((timeInSec / 60) % 60)
+    const hours = Math.floor(timeInSec / (60 * 60))
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+}
+
 async function ask(question) {
     const rl = readline.createInterface(process.stdin, process.stdout)
     const res = await rl.question(question + ' ')
@@ -106,9 +114,15 @@ for (let i = 0; i < inputFiles.length; i++) {
 
 console.log('')
 
+const startTime = Date.now()
+
 for (let i = 0; i < inputFiles.length; i++) {
     const input = inputFiles[i]
     await processFile(input, i, inputFiles.length)
 }
 
 console.log('')
+
+const endTime = Date.now()
+
+console.log(`Processed ${inputFiles.length} file(s) in ${formatDuration(endTime - startTime)}`)
