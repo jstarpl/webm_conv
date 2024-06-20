@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/jstarpl/webm_conv/issues"
   },
-  "homepage": "https://github.com/jstarpl/webm_conv#readme"
+  "homepage": "https://github.com/jstarpl/webm_conv#readme",
+  "dependencies": {
+    "ora": "^8.0.1"
+  }
 }
