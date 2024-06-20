@@ -1,0 +1,26 @@
+{
+  "name": "@jstarpl/webm_conv",
+  "version": "0.0.0",
+  "description": "A utility to quickly convert a video with alpha to a browser-friendly WebM with alpha",
+  "main": "index.mjs",
+  "type": "module",
+  "bin": {
+    "webm_conv": "./index.mjs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jstarpl/webm_conv.git"
+  },
+  "keywords": [
+    "ffmpeg"
+  ],
+  "author": "Jan Starzak",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jstarpl/webm_conv/issues"
+  },
+  "homepage": "https://github.com/jstarpl/webm_conv#readme"
+}
