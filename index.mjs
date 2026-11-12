@@ -71,7 +71,8 @@ async function processFile(file, index, size, args) {
         const ffmpeg = exec(`ffmpeg -i ${escapeFileArg(resovledPath)} -c:v libvpx-vp9 -b:v 25M -pix_fmt yuva420p -metadata:s:v:0 alpha_mode="1" -auto-alt-ref 0 ${args.join(' ')} ${escapeFileArg(targetPath)}`)
         ffmpeg.child.stderr.on('data', () => spinner.render())
         await ffmpeg
-    } catch {
+    } catch (e) {
+        console.error(`Failed to encode file "${fileName}": ${e.stderr || e.message}`)
         spinner.fail()
         return
     }
@@ -109,7 +110,7 @@ const inputFiles = []
 for (let i = 0; i < inputArguments.length; i++) {
     const input = inputArguments[i]
     if (input.startsWith('-')) {
-        inputFiles[inputFiles.length - 1].args.push(input)
+        inputFiles[inputFiles.length - 1].args.push(...input.split("="))
         continue
     }
     const ok = await checkTargetNotExisting(input)
