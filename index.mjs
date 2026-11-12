@@ -51,7 +51,7 @@ async function checkTargetNotExisting(file) {
     }
 }
 
-async function processFile(file, index, size) {
+async function processFile(file, index, size, args) {
     function makeSuffix(suffix) {
         return `(${index + 1}/${size}): ${suffix}`
     }
@@ -68,7 +68,7 @@ async function processFile(file, index, size) {
     spinner.stop()
     spinner.suffixText = makeSuffix('Encoding')
     try {
-        const ffmpeg = exec(`ffmpeg -i ${escapeFileArg(resovledPath)} -c:v libvpx-vp9 -b:v 25M -pix_fmt yuva420p -metadata:s:v:0 alpha_mode="1" -auto-alt-ref 0 ${escapeFileArg(targetPath)}`)
+        const ffmpeg = exec(`ffmpeg -i ${escapeFileArg(resovledPath)} -c:v libvpx-vp9 -b:v 25M -pix_fmt yuva420p -metadata:s:v:0 alpha_mode="1" -auto-alt-ref 0 ${args.join(' ')} ${escapeFileArg(targetPath)}`)
         ffmpeg.child.stderr.on('data', () => spinner.render())
         await ffmpeg
     } catch {
@@ -97,20 +97,30 @@ async function processFile(file, index, size) {
     })
 }
 
-const inputFiles = process.argv.slice(2)
+const inputArguments = process.argv.slice(2)
 
-if (inputFiles.length === 0) {
+if (inputArguments.length === 0) {
     console.log("No files provided for encoding")
     process.exit(1)
 }
 
-for (let i = 0; i < inputFiles.length; i++) {
-    const input = inputFiles[i]
+const inputFiles = []
+
+for (let i = 0; i < inputArguments.length; i++) {
+    const input = inputArguments[i]
+    if (input.startsWith('-')) {
+        inputFiles[inputFiles.length - 1].args.push(input)
+        continue
+    }
     const ok = await checkTargetNotExisting(input)
     if (!ok) {
         console.log("Aborting")
         process.exit(1)
     }
+    inputFiles.push({
+        input,
+        args: [],
+    })
 }
 
 console.log('')
@@ -119,7 +129,7 @@ const startTime = Date.now()
 
 for (let i = 0; i < inputFiles.length; i++) {
     const input = inputFiles[i]
-    await processFile(input, i, inputFiles.length)
+    await processFile(input.input, i, inputFiles.length, input.args)
 }
 
 console.log('')
